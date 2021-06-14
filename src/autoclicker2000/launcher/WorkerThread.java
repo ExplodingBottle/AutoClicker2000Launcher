@@ -22,6 +22,12 @@ public class WorkerThread extends Thread {
 
 	private boolean isAlreadyDownloaded = false;
 
+	public Process process;
+
+	public String leftClick;
+	public String rightClick;
+	public int cpsAmount;
+
 	public WorkerThread(LauncherFrame frame) {
 		logger = Logger.getLogger(getClass().getName());
 		this.frame = frame;
@@ -30,10 +36,10 @@ public class WorkerThread extends Thread {
 		toDownloadZip = new File(System.getProperty("user.home") + "/autoclicker2000/rel.zip");
 		releaseExtracted = new File(System.getProperty("user.home") + "/autoclicker2000/bin");
 
-		frame.progressIndicator.setString("Creating directories...");
-
 		logger.log(Level.INFO, "System.getProperty(\"os.name\") == " + System.getProperty("os.name"));
 		logger.log(Level.INFO, "System.getProperty(\"user.home\") == " + System.getProperty("user.home"));
+		
+		frame.progressIndicator.setString("Creating directories...");
 
 		if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
 			logger.log(Level.SEVERE, "Running on unsupported system.");
@@ -126,7 +132,6 @@ public class WorkerThread extends Thread {
 
 		Runtime runner = Runtime.getRuntime();
 		String execCommand = null;
-		Process process;
 		if (pythonCommand == PythonType.PYTHON_ALT) {
 			execCommand = new File(releaseExtracted.getAbsolutePath() + "/AutoClicker-Alt.bat").getAbsolutePath();
 		}
@@ -134,7 +139,13 @@ public class WorkerThread extends Thread {
 			execCommand = new File(releaseExtracted.getAbsolutePath() + "/AutoClicker.bat").getAbsolutePath();
 		}
 		try {
-			process = runner.exec("cmd /C start cmd /C " + execCommand, null, releaseExtracted);
+			process = runner.exec(execCommand, null, releaseExtracted);
+			process.getOutputStream().write(new String(leftClick + "\n").getBytes());
+			process.getOutputStream().write(new String(rightClick + "\n").getBytes());
+			process.getOutputStream().write(new String(cpsAmount + "\n").getBytes());
+			process.getOutputStream().flush();
+			frame.progressIndicator.setString("Started !");
+			frame.stop.setEnabled(true);
 			process.waitFor();
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "Failed to start the program.", e);
