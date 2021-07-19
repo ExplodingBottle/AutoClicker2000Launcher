@@ -1,3 +1,21 @@
+/*
+ * AutoClicker2000 Launcher
+ * Copyright (C) 2021  ExplodingBottle
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package autoclicker2000.launcher;
 
 import java.io.BufferedReader;
@@ -38,7 +56,7 @@ public class WorkerThread extends Thread {
 
 		logger.log(Level.INFO, "System.getProperty(\"os.name\") == " + System.getProperty("os.name"));
 		logger.log(Level.INFO, "System.getProperty(\"user.home\") == " + System.getProperty("user.home"));
-		
+
 		frame.progressIndicator.setString("Creating directories...");
 
 		if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
@@ -153,10 +171,21 @@ public class WorkerThread extends Thread {
 			return;
 		} catch (InterruptedException e) {
 			logger.log(Level.WARNING, "Failed to wait for program to stop", e);
+
 		}
 		logger.log(Level.INFO, "Closing window...");
 		frame.setVisible(false);
 		frame.dispose();
 
+	}
+
+	public void stopProgram() {
+		frame.progressIndicator.setString("Stopping...");
+		try {
+			process.getOutputStream().write(new String("\n").getBytes());
+			process.getOutputStream().flush();
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "Failed to send the stop request to the program.", e);
+		}
 	}
 }
